@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contract-driven-scaffolding"
+version = "1.0.0"
+description = "Turn each field incident into a machine-checked contract; turn the set of contracts into a promotion backlog ranked by blast radius. A design pattern with a dependency-free reference implementation."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Neoulsoft Inc." }]
+keywords = [
+  "static-analysis", "linter", "scaffolding", "codegen", "ai-native",
+  "contracts", "self-diagnosis", "framework", "guardrails", "developer-tools",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.urls]
+Homepage = "https://github.com/nskit-io/contract-driven-scaffolding"
+"NSKit" = "https://github.com/nskit-io/nskit-io"
+
+[tool.setuptools]
+packages = ["contracts"]
+package-dir = { contracts = "src/contracts" }

@@ -1,0 +1,4 @@
+<script th:inline="javascript">
+  var user = [[${currentUser}]];   /* legit Thymeleaf server expression */
+  console.log(user.name);
+</script>
