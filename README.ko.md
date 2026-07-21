@@ -62,11 +62,38 @@ LLM에게 코드베이스를 주면 대부분 맞는 코드를, 일부 틀린 �
 - **판정식** — *기계*가 돌린다, 사람 리뷰가 아니라. 성립 / 위반 / 해당없음.
 - **위반 신호** — 머신리더블: `file:line:contract`. 다른 툴이 — 혹은 자기 출력을 고치는 AI가 — 파싱해서 행동한다. 사람용 리포트는 그 위에 얹은 친절일 뿐.
 
+```mermaid
+flowchart LR
+  T["🎯 target<br/>config · template · source"] --> PR{"⚙️ predicate<br/>runs on a machine"}
+  PR -->|holds| PASS["✅ pass"]
+  PR -->|does not apply| NA["⚪ n/a"]
+  PR -->|violated| SIG["📍 signal<br/>file : line : contract"]
+  SIG --> ACT["🤖 a tool — or an AI<br/>fixing its own output — acts"]
+  style PASS fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+  style NA fill:#20242b,stroke:#8a919c,color:#d7dbe0
+  style SIG fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style ACT fill:#1a2740,stroke:#5b8def,color:#d7e3ff
+```
+
 규율은 이렇다: **계약 없이는 프레임워크에 프리미티브를 추가하지 않는다.** 계약이 곧 자가진단이다.
 
 ## 3-tier: static · runtime · verify
 
 각 버그를 잡을 수 있는 가장 이르고 싼 tier에서 잡는다.
+
+```mermaid
+flowchart LR
+  B["a convention<br/>violation"] --> S{"visible in<br/>source alone?"}
+  S -->|yes| T1["STATIC · doctor scan<br/>cheap · 100% · pre-commit"]
+  S -->|no| R{"visible in the<br/>live app's state?"}
+  R -->|yes| T2["RUNTIME · Contract.report()<br/>async race · token path · unrendered part"]
+  R -->|only when driven| T3["VERIFY · drive + observe<br/>dead click · visual regression · staleness"]
+  style T1 fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+  style T2 fill:#1a2740,stroke:#5b8def,color:#d7e3ff
+  style T3 fill:#3a2a12,stroke:#e0a458,color:#ffe9c8
+```
+
+모든 tier에서 형태는 같은 4-요소, 바뀌는 건 비용과 시점뿐:
 
 ```
 STATIC (빌드/린트)          RUNTIME (자기서술)              VERIFY (closed-loop)
@@ -95,13 +122,56 @@ STATIC (빌드/린트)          RUNTIME (자기서술)              VERIFY (clos
 
 *가장 많은* 프로젝트가 위반하는 계약이 곧 **소스에서 고칠 가치가 가장 큰 추상화**다 — 스캐폴드, base 템플릿, 프레임워크 API에서 고쳐 다신 재발 못 하게. 매트릭스는 **폭발반경 순으로 정렬된 승격 백로그**이며, 각 프로젝트를 게이트하는 바로 그 검사에서 그대로 떨어져 나온다. 이제 린터가 "네 컨벤션 중 다음에 뭘 고칠지"를 알려준다. 범용 툴은 이걸 못 한다 — 그 컨벤션이 네 것임을 모르기 때문이다.
 
-이게 플라이휠이다: **사건 → 계약 → fleet 매트릭스 → 소스에서 수정 → 영원히 green.** 데인 버그 하나하나가 미래의 모든 프로젝트를 조금씩 더 깨지지 않게 만든다.
+```mermaid
+flowchart TB
+  subgraph fleet["one contract, run across the whole fleet"]
+    direction LR
+    P1["app A&nbsp;&nbsp;✗"]
+    P2["app B&nbsp;&nbsp;✗"]
+    P3["app C&nbsp;&nbsp;✓"]
+    P4["app D&nbsp;&nbsp;✗"]
+  end
+  P1 --> AGG["FEATURE-GUARD<br/>violated by 3 of 4"]
+  P2 --> AGG
+  P4 --> AGG
+  AGG --> FIX["fix it once in the scaffold<br/>→ 3 apps go green at once,<br/>and no future app can regress it"]
+  style P3 fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+  style AGG fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style FIX fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+```
+
+이게 플라이휠이다 — 한 바퀴 돌 때마다 다음 프로젝트가 더 깨지기 어려워진다:
+
+```mermaid
+flowchart LR
+  I["🔥 Incident<br/>a bug ships once"] --> C["📜 Contract<br/>encode its shape"]
+  C --> M["📊 Fleet matrix<br/>who else violates it"]
+  M --> F["🔧 Fix at the source<br/>scaffold · base · API"]
+  F --> G["✅ Green forever<br/>can't silently recur"]
+  G -.->|"the next bug you hit"| I
+  style I fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style G fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+```
+
+**사건 → 계약 → fleet 매트릭스 → 소스에서 수정 → 영원히 green.** 데인 버그 하나하나가 미래의 모든 프로젝트를 조금씩 더 깨지지 않게 만든다.
 
 ## 어려운 부분: 순진한 grep은 거짓말한다
 
 계약 린터의 신뢰도는 look-alike에 *안 터지려는* 의지만큼이다. 늑대야 한 번 외치는 순간 사람들은 안 읽고, 아무도 안 믿는 게이트는 게이트가 없느니만 못하다. 비싸게 배운 교훈 셋이 레퍼런스 엔진에 박혀 있다:
 
 **1. 주석은 코드가 아니다.** 주석 속 금지 토큰은 위반이 아니다. 근데 블록주석을 라인주석보다 먼저 blank하면 팬텀 버그가 난다: `// 나중에 삭제: /api/**` 같은 줄엔 `/*` 부분문자열이 있어, 다음 `*/`까지 진짜 코드를 다 삼키는 블록주석을 연다. 해법은 단일 좌→우 alternation — 먼저 열리는 주석이 이긴다 — 언어 lexer가 보는 그대로. ([`core.py`](src/contracts/core.py)의 `blank_comments`.)
+
+```mermaid
+flowchart LR
+  SRC["source line:<br/>// drop later: /api/**<br/>const keep = REAL_CODE"]
+  SRC --> N["naive: strip /* … */ first"]
+  N --> PH["the '/*' inside the comment<br/>opens a phantom block…"]
+  PH --> X["…that swallows REAL_CODE<br/>❌ silent false negative"]
+  SRC --> H["honest: one left-to-right pass,<br/>first opener wins"]
+  H --> OK["comment blanked, code kept<br/>✅ line numbers preserved"]
+  style X fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style OK fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+```
 
 **2. 같은 글자가 위치에 따라 다른 뜻이다.** 템플릿 안 `[[${user}]]`는 정당한 서버 표현식이고, `[[ 'a', 1 ], …]`는 템플릿 엔진이 조용히 뭉개는 JS 배열의배열이다. 계약은 후자엔 터지고 전자엔 절대 안 터져야 한다.
 

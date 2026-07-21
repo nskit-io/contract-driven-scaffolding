@@ -62,11 +62,38 @@ contract = (target, when-checked, predicate, violation-signal)
 - **predicate** — runs on a *machine*, never a human. It holds, is violated, or does not apply.
 - **violation-signal** — machine-readable: `file:line:contract`. Another tool — or an AI fixing its own output — parses it and acts. A human-readable report is a courtesy layered on top.
 
+```mermaid
+flowchart LR
+  T["🎯 target<br/>config · template · source"] --> PR{"⚙️ predicate<br/>runs on a machine"}
+  PR -->|holds| PASS["✅ pass"]
+  PR -->|does not apply| NA["⚪ n/a"]
+  PR -->|violated| SIG["📍 signal<br/>file : line : contract"]
+  SIG --> ACT["🤖 a tool — or an AI<br/>fixing its own output — acts"]
+  style PASS fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+  style NA fill:#20242b,stroke:#8a919c,color:#d7dbe0
+  style SIG fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style ACT fill:#1a2740,stroke:#5b8def,color:#d7e3ff
+```
+
 The discipline is: **you do not add a primitive to the framework without the contract that proves it.** The contract *is* the self-diagnosis.
 
 ## The three tiers: static, runtime, verify
 
 Catch each bug at the earliest, cheapest tier it can be caught at.
+
+```mermaid
+flowchart LR
+  B["a convention<br/>violation"] --> S{"visible in<br/>source alone?"}
+  S -->|yes| T1["STATIC · doctor scan<br/>cheap · 100% · pre-commit"]
+  S -->|no| R{"visible in the<br/>live app's state?"}
+  R -->|yes| T2["RUNTIME · Contract.report()<br/>async race · token path · unrendered part"]
+  R -->|only when driven| T3["VERIFY · drive + observe<br/>dead click · visual regression · staleness"]
+  style T1 fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+  style T2 fill:#1a2740,stroke:#5b8def,color:#d7e3ff
+  style T3 fill:#3a2a12,stroke:#e0a458,color:#ffe9c8
+```
+
+The same four-part shape at every tier — only the cost and the moment change:
 
 ```
 STATIC  (build / lint)         RUNTIME (self-report)          VERIFY  (closed-loop)
@@ -96,13 +123,54 @@ A gate that only says pass/fail on one project is a linter. Run the *same* contr
 
 The contract violated by the **most** projects is the abstraction most worth fixing *at the source* — in the scaffold, the base template, the framework API — so it can never recur. The matrix is a **promotion backlog ranked by blast radius**, and it falls straight out of the same checks that gate each project. Your linter now tells you which of your own conventions to fix next. No generic tool can do this, because no generic tool knows the convention was yours.
 
-This is the flywheel: **incident → contract → fleet matrix → fix at the source → green forever.** Each bug you get burned by makes every future project a little more impossible to break.
+```mermaid
+flowchart TB
+  subgraph fleet["one contract, run across the whole fleet"]
+    direction LR
+    P1["app A&nbsp;&nbsp;✗"]
+    P2["app B&nbsp;&nbsp;✗"]
+    P3["app C&nbsp;&nbsp;✓"]
+    P4["app D&nbsp;&nbsp;✗"]
+  end
+  P1 --> AGG["FEATURE-GUARD<br/>violated by 3 of 4"]
+  P2 --> AGG
+  P4 --> AGG
+  AGG --> FIX["fix it once in the scaffold<br/>→ 3 apps go green at once,<br/>and no future app can regress it"]
+  style P3 fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+  style AGG fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style FIX fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+```
+
+This is the flywheel — each turn makes the next project harder to break:
+
+```mermaid
+flowchart LR
+  I["🔥 Incident<br/>a bug ships once"] --> C["📜 Contract<br/>encode its shape"]
+  C --> M["📊 Fleet matrix<br/>who else violates it"]
+  M --> F["🔧 Fix at the source<br/>scaffold · base · API"]
+  F --> G["✅ Green forever<br/>can't silently recur"]
+  G -.->|"the next bug you hit"| I
+  style I fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style G fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+```
 
 ## The hard part: naive grep lies
 
 A contract linter is only as trustworthy as its willingness to *not* fire on look-alikes. The moment it cries wolf, people stop reading it, and a gate nobody trusts is worse than no gate. Three lessons, each learned the expensive way, are baked into the reference engine:
 
 **1. Comments are not code.** A forbidden token in a comment is not a violation. But blank block comments before line comments and you get a phantom bug: a line like `// drop later: /api/**` contains the substring `/*`, which opens a block comment that eats every real line until the next `*/`. The fix is a single left-to-right alternation — whichever comment opens first wins — exactly as the language lexer sees it. (`blank_comments` in [`core.py`](src/contracts/core.py).)
+
+```mermaid
+flowchart LR
+  SRC["source line:<br/>// drop later: /api/**<br/>const keep = REAL_CODE"]
+  SRC --> N["naive: strip /* … */ first"]
+  N --> PH["the '/*' inside the comment<br/>opens a phantom block…"]
+  PH --> X["…that swallows REAL_CODE<br/>❌ silent false negative"]
+  SRC --> H["honest: one left-to-right pass,<br/>first opener wins"]
+  H --> OK["comment blanked, code kept<br/>✅ line numbers preserved"]
+  style X fill:#3a1220,stroke:#ff5470,color:#ffd7df
+  style OK fill:#0f2419,stroke:#3ddc84,color:#c8f7dc
+```
 
 **2. The same characters mean different things in different places.** `[[${user}]]` inside a template is a legitimate server expression; `[[ 'a', 1 ], …]` is a JavaScript array-of-arrays that the template engine will silently mangle. The contract must fire on the second and never the first.
 
