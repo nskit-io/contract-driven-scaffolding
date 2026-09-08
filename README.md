@@ -4,7 +4,7 @@
 
 **You can't review every line an AI writes. So stop reviewing — make each project prove itself green against the bugs you've already been burned by.**
 
-> Used by [**NSKit**](https://github.com/nskit-io/nskit-io) — *bound by structure, free to combine.* This is the self-diagnosis model behind NSKit's `doctor`, which gates a fleet of ~30 production apps largely authored by an LLM.
+> Used by [**NSKit**](https://github.com/nskit-io/nskit-io) — *bound by structure, free to combine.* This is the self-diagnosis model behind NSKit's `doctor`, which gates a fleet of 21 production apps largely authored by an LLM.
 
 > A bug happens once. Then you write the check that makes its *shape* impossible — and run that check across everything you own, forever.
 
