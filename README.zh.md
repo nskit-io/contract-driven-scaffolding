@@ -4,7 +4,7 @@
 
 **你没法逐行审查 AI 写出的每一行代码。那就别再审查——让每个项目在你已经栽过跟头的那些 bug 面前，自己证明自己是 green 的。**
 
-> [**NSKit**](https://github.com/nskit-io/nskit-io) 正在使用 — *受结构约束，组合自由。* 这是 NSKit `doctor` 背后的自诊断模型，用它为21 个大部分由 LLM 编写的生产应用把关。
+> [**NSKit**](https://github.com/nskit-io/nskit-io) 正在使用 — *受结构约束，组合自由。* 这是 NSKit `doctor` 背后的自诊断模型，用它为 NSKit 舰队中大部分由 LLM 编写的全部生产服务把关。
 
 > bug 只发生一次。接下来要做的不是去修，而是写一条检查，让这个 bug 的*形态*再也无法成立——然后在你拥有的每一个项目上永远跑下去。
 
@@ -167,7 +167,7 @@ flowchart LR
 
 ## 参考代码
 
-[`src/`](src/) 里是零依赖的 Python——约 200 行的引擎，加上一套起步契约库，每条都从真实的现场事故里蒸馏而来。一条契约，不过是一个接收 `Project` 的小函数。
+[`src/`](src/) 里是零依赖的 Python——约 280 行的核心引擎，加上一套起步契约库，每条都从真实的现场事故里蒸馏而来。一条契约，不过是一个接收 `Project` 的小函数。
 
 ```python
 from src.contracts import contract, Project, Result, Severity, verdict

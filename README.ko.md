@@ -4,7 +4,7 @@
 
 **AI가 쏟아내는 코드를 한 줄씩 리뷰할 순 없다. 그러니 리뷰를 붙잡는 대신, 이미 크게 데어 본 버그들 앞에서 프로젝트가 스스로 green을 증명하게 만든다.**
 
-> [**NSKit**](https://github.com/nskit-io/nskit-io) 에서 사용 중 — *구조에는 묶이되, 조합은 자유롭게.* NSKit `doctor` 를 떠받치는 자가진단 모델이며, 대부분 LLM이 짠 21개 프로덕션 앱을 이걸로 게이트한다.
+> [**NSKit**](https://github.com/nskit-io/nskit-io) 에서 사용 중 — *구조에는 묶이되, 조합은 자유롭게.* NSKit `doctor` 를 떠받치는 자가진단 모델이며, 대부분 LLM이 짠 NSKit 함대의 프로덕션 서비스 전체를 이걸로 게이트한다.
 
 > 버그는 한 번 터진다. 그다음 할 일은 고치는 게 아니라, 그 버그의 *형태*를 다시는 성립할 수 없게 만드는 검사 하나를 짜고 — 가진 모든 프로젝트에 영원히 돌리는 것이다.
 
@@ -167,7 +167,7 @@ flowchart LR
 
 ## 레퍼런스 코드
 
-[`src/`](src/) 안에 의존성 없는 Python — ~200줄짜리 엔진과, 각각 실제 현장 사건에서 증류한 스타터 계약 라이브러리다. 계약은 `Project` 하나를 받는 작은 함수다.
+[`src/`](src/) 안에 의존성 없는 Python — ~280줄짜리 코어 엔진과, 각각 실제 현장 사건에서 증류한 스타터 계약 라이브러리다. 계약은 `Project` 하나를 받는 작은 함수다.
 
 ```python
 from src.contracts import contract, Project, Result, Severity, verdict

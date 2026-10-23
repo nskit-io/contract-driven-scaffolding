@@ -4,7 +4,7 @@
 
 **You can't review every line an AI writes. So stop reviewing — make each project prove itself green against the bugs you've already been burned by.**
 
-> Used by [**NSKit**](https://github.com/nskit-io/nskit-io) — *bound by structure, free to combine.* This is the self-diagnosis model behind NSKit's `doctor`, which gates a fleet of 21 production apps largely authored by an LLM.
+> Used by [**NSKit**](https://github.com/nskit-io/nskit-io) — *bound by structure, free to combine.* This is the self-diagnosis model behind NSKit's `doctor`, which gates every app in the NSKit fleet — production services largely authored by an LLM.
 
 > A bug happens once. Then you write the check that makes its *shape* impossible — and run that check across everything you own, forever.
 
@@ -117,7 +117,7 @@ A gate that only says pass/fail on one project is a linter. Run the *same* contr
   red_app                  ✗          ✗          ✗          ✗          ✗   5 fail
 
   Promotion backlog — fix these at the source, widest blast radius first:
-    FEATURE-GUARD          7 projects: aweb, mall, plaza, wallet, …
+    FEATURE-GUARD          7 projects: app-a, app-b, app-c, app-d, …
     LOCALE-PARITY          3 projects: …
 ```
 
@@ -180,7 +180,7 @@ These are why the pattern is more than "some regexes." Getting them right is the
 
 ## Reference code
 
-Dependency-free Python in [`src/`](src/) — a ~200-line engine plus a starter library of contracts, each distilled from a real field incident. A contract is a small function over a `Project`:
+Dependency-free Python in [`src/`](src/) — a ~280-line core engine plus a starter library of contracts, each distilled from a real field incident. A contract is a small function over a `Project`:
 
 ```python
 from src.contracts import contract, Project, Result, Severity, verdict
