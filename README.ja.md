@@ -221,3 +221,5 @@ python -m src.doctor matrix ./all-my-projects
 ## ライセンス
 
 MIT © Neoulsoft Inc. [LICENSE](LICENSE) を参照。
+
+> 本リポジトリは設計パターンとリファレンスを MIT ライセンスで公開するものです。NSKit フレームワーク本体（ランタイム・スキャフォールディング・チェッカー・運用標準）は Neoulsoft Inc. の非公開資産であり、別途商用ライセンスで提供されます。

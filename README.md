@@ -237,3 +237,5 @@ If a rule is universal, reach for Semgrep. If a rule exists because *you* built 
 ## License
 
 MIT © Neoulsoft Inc. See [LICENSE](LICENSE).
+
+> This repository publishes the design pattern and reference material under the MIT License. The NSKit framework itself (runtime, scaffolding, checkers and operating standards) is proprietary to Neoulsoft Inc. and available under a separate commercial license.

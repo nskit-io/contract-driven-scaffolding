@@ -221,3 +221,5 @@ python -m src.doctor matrix ./all-my-projects
 ## 许可证
 
 MIT © Neoulsoft Inc. 见 [LICENSE](LICENSE)。
+
+> 本仓库以 MIT 许可证公开设计模式与参考资料。NSKit 框架本体（运行时、脚手架、检查器与运维标准）为 Neoulsoft Inc. 的非公开资产，另行以商业许可提供。
