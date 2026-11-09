@@ -117,9 +117,12 @@ A gate that only says pass/fail on one project is a linter. Run the *same* contr
   red_app                  ✗          ✗          ✗          ✗          ✗   5 fail
 
   Promotion backlog — fix these at the source, widest blast radius first:
-    FEATURE-GUARD          7 projects: app-a, app-b, app-c, app-d, …
-    LOCALE-PARITY          3 projects: …
+    NO-DEBUG-MARKER         1 projects: red_app
+    INLINE-ARRAY-COLLISION  1 projects: red_app
+    …
 ```
+
+*(Output of `python examples/demo.py`, two fixture projects. On a real fleet the counts differ per contract, and that spread is what ranks the backlog.)*
 
 The contract violated by the **most** projects is the abstraction most worth fixing *at the source* — in the scaffold, the base template, the framework API — so it can never recur. The matrix is a **promotion backlog ranked by blast radius**, and it falls straight out of the same checks that gate each project. Your linter now tells you which of your own conventions to fix next. No generic tool can do this, because no generic tool knows the convention was yours.
 
